@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -11,3 +6,10 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model categoria_instrumento {
+  id_categoria     Int     @id(map: "pk_categoria_instrumento") @default(autoincrement())
+  nombre_categoria String  @unique(map: "uq_categoria_instrumento_nombre") @db.VarChar(100)
+  descripcion      String? @db.VarChar(255)
+}
+
