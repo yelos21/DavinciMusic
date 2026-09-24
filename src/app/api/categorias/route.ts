@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../lib/prisma";
 
-// A - Alta (Crear)
+// A - Alta 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   }
 }
 
-// C - Consulta (Leer todas)
+// C - Consulta
 export async function GET() {
   try {
     const categorias = await prisma.categoria_instrumento.findMany();
@@ -29,7 +29,7 @@ export async function GET() {
   }
 }
 
-// B - Cambio (Actualizar)
+// B - Cambio 
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
@@ -46,7 +46,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({ ok: false, error: String(error) }, { status: 500 });
   }
 }
-
+// D - Baja
 export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
