@@ -7,9 +7,239 @@ datasource db {
   provider = "postgresql"
 }
 
-model categoria_instrumento {
-  id_categoria     Int     @id(map: "pk_categoria_instrumento") @default(autoincrement())
-  nombre_categoria String  @unique(map: "uq_categoria_instrumento_nombre") @db.VarChar(100)
-  descripcion      String? @db.VarChar(255)
+model Usuario {
+  id_usuario        Int      @id @default(autoincrement())
+  nombre_usuario    String   @unique
+  nombre            String
+  apellido_paterno  String
+  apellido_materno  String?  // opcional
+  fecha_nacimiento  DateTime
+  curp              String   @unique
+  ine               String?  @unique // opcional
+  correo            String   @unique
+  telefono          String?  // opcional
+  direccion         String?  // opcional
+  contrasena_hash   String
+  activo            Boolean  @default(true)
+  fecha_registro    DateTime @default(now())
+
+  cliente        Cliente?
+  maestro        Maestro?
+  administrador  Administrador?
+
+  @@map("usuario")
 }
 
+model Cliente {
+  id_cliente  Int      @id @default(autoincrement())
+  id_usuario  Int      @unique
+  fecha_alta  DateTime @default(now())
+
+  usuario        Usuario             @relation(fields: [id_usuario], references: [id_usuario])
+  inscripciones  InscripcionClase[]
+  ventas         Venta[]
+
+  @@map("cliente")
+}
+
+model Administrador {
+  id_administrador    Int      @id @default(autoincrement())
+  id_usuario          Int      @unique
+  fecha_contratacion  DateTime
+
+  usuario  Usuario               @relation(fields: [id_usuario], references: [id_usuario])
+  ventas   Venta[]
+  ordenes  OrdenAbastecimiento[]
+
+  @@map("administrador")
+}
+
+model Maestro {
+  id_maestro          Int      @id @default(autoincrement())
+  id_usuario          Int      @unique
+  especialidad        String
+  fecha_contratacion  DateTime
+  activo              Boolean  @default(true)
+
+  usuario  Usuario  @relation(fields: [id_usuario], references: [id_usuario])
+  clases   Clase[]
+
+  @@map("maestro")
+}
+
+
+model PeriodoAcademico {
+  id_periodo      Int      @id @default(autoincrement())
+  nombre_periodo  String   @unique
+  fecha_inicio    DateTime
+  fecha_fin       DateTime
+  estado          String   // ej. "Activo" | "Cerrado" | "Proximo"
+
+  clases  Clase[]
+
+  @@map("periodo_academico")
+}
+
+model CategoriaInstrumento {
+  id_categoria      Int     @id @default(autoincrement())
+  nombre_categoria  String  @unique
+  descripcion       String? // opcional
+
+  instrumentos  Instrumento[]
+
+  @@map("categoria_instrumento")
+}
+
+model Instrumento {
+  id_instrumento      Int      @id @default(autoincrement())
+  id_categoria        Int
+  nombre_instrumento  String
+  marca               String?  // opcional
+  modelo              String?  // opcional
+  tamano              String?  // opcional
+  color               String?  // opcional
+  precio_venta        Decimal  @db.Decimal(10, 2)
+  stock_actual        Int      @default(0)
+  activo              Boolean  @default(true)
+
+  categoria       CategoriaInstrumento @relation(fields: [id_categoria], references: [id_categoria])
+  clases          Clase[]
+  detalles_venta  DetalleVenta[]
+  detalles_orden  DetalleOrden[]
+
+  @@map("instrumento")
+}
+
+model Clase {
+  id_clase Int @id @default(autoincrement())
+  id_maestro Int
+  id_instrumento Int
+  id_periodo Int 
+  nombre_clase String 
+  nivel String  
+  costo_mensual Decimal @db.Decimal(10,2)
+  cupo_maximo Int 
+  activa Boolean @default(true)
+
+  maestro Maestro @relation(fields: [id_maestro], references: [id_maestro])
+  instrumento Instrumento @relation(fields: [id_instrumento], references: [id_instrumento])
+  periodo PeriodoAcademico @relation(fields: [id_periodo], references: [id_periodo])
+  horarios HorarioClase[]
+  inscripciones InscripcionClase[]
+
+  @@map("clase")
+}
+
+model HorarioClase{
+  id_horario Int  @id @default(autoincrement())
+  id_clase Int 
+  dia_semana String
+  hora_inicio DateTime @db.Time
+  hora_fin  DateTime @db.Time 
+  salon String?
+
+   clase Clase @relation(fields: [id_clase], references: [id_clase])
+
+  @@map("horario_clase")
+}
+
+model InscripcionClase{
+  id_inscripcion Int @id @default(autoincrement())
+  id_cliente Int 
+  id_clase Int 
+  fecha_inscripcion DateTime @db.Time 
+  costo_mensual_acordado  Decimal  @db.Decimal(10, 2)
+  estado_inscripcion String @default("Activa")
+
+  cliente Cliente @relation(fields: [id_cliente], references: [id_cliente])
+  clase Clase @relation(fields: [id_clase], references: [id_clase])
+  pagos pagoClase[]
+
+  @@map("inscripcion_clase")
+}
+
+model pagoClase {
+  id_pago_clase Int @id @default(autoincrement())
+  id_inscripcion Int 
+  periodo_pagado  DateTime @db.Time
+  importe Decimal @db.Decimal(10,2)
+  fecha_vencimiento DateTime 
+  fecha_pago DateTime?
+  metodo_pago String?
+  estado_pago String @default("Pendiente")
+
+  inscripcion  InscripcionClase  @relation(fields: [id_inscripcion], references: [id_inscripcion])
+
+  @@map("pago_clase")
+}
+
+model Venta {
+  id_venta Int @id @default(autoincrement())
+  id_cliente Int 
+  id_administrador Int 
+  fecha_venta DateTime @default(now())
+  metodo_pago String
+  estado_venta String @default("Completada")
+
+  cliente Cliente  @relation(fields: [id_cliente], references: [id_cliente])
+  administrador Administrador  @relation(fields: [id_administrador], references: [id_administrador])
+  detalles DetalleVenta[]  
+  
+  @@map("venta")
+}
+
+model DetalleVenta  {
+  id_venta Int 
+  id_instrumento Int 
+  cantidad Int 
+  precio_unitario Decimal @db.Decimal(10,2)
+
+  venta Venta @relation(fields: [id_venta], references: [id_venta])
+  instrumento Instrumento @relation(fields: [id_instrumento], references: [id_instrumento])
+
+  @@id([id_venta, id_instrumento])
+  @@map("detalle_venta")
+}
+
+model Proveedor {
+  id_proovedor Int @id @default(autoincrement())
+  nombre_proveedor String
+  rfc String @unique
+  correo String
+  direccion String?
+  telefono String
+  activo Boolean @default(true)
+
+  ordenes OrdenAbastecimiento[]
+
+  @@map("proveedor")
+}
+
+model OrdenAbastecimiento {
+  id_orden Int @id @default(autoincrement())
+  id_proovedor Int 
+  id_administrador Int 
+  fecha_orden DateTime @default(now())
+  estado_orden String @default("Pendiente")
+
+  proveedor Proveedor @relation(fields: [id_proovedor], references: [id_proovedor])
+  administrador Administrador @relation (fields: [id_administrador], references: [id_administrador])
+  detalles DetalleOrden[]
+
+  @@map("orden_abastecimiento")
+}
+
+model DetalleOrden {
+  id_orden Int 
+  id_instrumento Int 
+  cantidad_solicitada Int 
+  cantidad_recibida Int @default(0)
+  costo_unitario Decimal @db.Decimal(10,2)
+
+  orden OrdenAbastecimiento @relation(fields: [id_orden], references: [id_orden])
+  instrumento Instrumento @relation(fields: [id_instrumento], references: [id_instrumento])
+
+
+  @@id([id_orden, id_instrumento])
+  @@map("detalles_orden")
+}
