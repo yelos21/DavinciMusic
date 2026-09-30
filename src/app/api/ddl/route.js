@@ -1,8 +1,5 @@
-import { PrismaClient } from '@prisma/client';
- 
-const prisma = globalThis.prisma ?? new PrismaClient();
-if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma;
- 
+import { prisma } from '@/app/lib/prisma';
+
 const TIPOS = {
   texto: 'VARCHAR(100)',
   entero: 'INTEGER',
@@ -11,6 +8,7 @@ const TIPOS = {
   booleano: 'BOOLEAN',
 };
  
+// Solo letras, números y guion bajo (evita SQL injection en nombres)
 const esNombreValido = (n) => typeof n === 'string' && /^[a-zA-Z_][a-zA-Z0-9_]{0,62}$/.test(n);
  
 function construirSQL({ accion, tabla, columna, nuevo, tipo }) {
@@ -51,4 +49,3 @@ export async function POST(req) {
     return Response.json({ ok: false, error: e.message }, { status: 400 });
   }
 }
- 
