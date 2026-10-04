@@ -9,23 +9,25 @@ datasource db {
 
 model Usuario {
   id_usuario        Int      @id @default(autoincrement())
-  nombre_usuario    String   @unique
+  nombre_usuario    String?   @unique
   nombre            String
-  apellido_paterno  String
+  apellido_paterno  String?
   apellido_materno  String?  // opcional
-  fecha_nacimiento  DateTime
-  curp              String   @unique
+  fecha_nacimiento  DateTime?
+  curp              String?   @unique
   ine               String?  @unique // opcional
   correo            String   @unique
   telefono          String?  // opcional
   direccion         String?  // opcional
-  contrasena_hash   String
+  contrasena_hash   String?
   activo            Boolean  @default(true)
   fecha_registro    DateTime @default(now())
 
   cliente        Cliente?
   maestro        Maestro?
   administrador  Administrador?
+  authUserId  String? @unique
+  authUser    User?   @relation(fields: [authUserId], references: [id])
 
   @@map("usuario")
 }
@@ -243,3 +245,70 @@ model DetalleOrden {
   @@id([id_orden, id_instrumento])
   @@map("detalles_orden")
 }
+
+
+// better auth tablas 
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+
+  sessions Session[]
+  accounts Account[]
+  usuario  Usuario?   // conexión con la tabla de negocio
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
