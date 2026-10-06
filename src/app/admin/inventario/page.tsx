@@ -24,20 +24,10 @@ export default async function InventarioPage() {
         ← Volver al panel
       </Link>
 
-      <div className="mt-4 flex items-end justify-between">
-        <div>
-          <h1 className="font-serif text-4xl font-semibold">Inventario</h1>
-          <p className="mt-2 text-[#B8B2A3]">
-            {instrumentos.length} instrumentos · {conStockBajo} con stock bajo
-          </p>
-        </div>
-        <Link
-          href="/admin/inventario/nuevo"
-          className="rounded-lg bg-[#C9A24B] px-5 py-3 text-sm font-semibold text-[#0F0F10] hover:bg-[#DDB95F]"
-        >
-          Nuevo instrumento
-        </Link>
-      </div>
+      <h1 className="mt-4 font-serif text-4xl font-semibold">Inventario</h1>
+      <p className="mt-2 text-[#B8B2A3]">
+        {instrumentos.length} instrumentos · {conStockBajo} con stock bajo
+      </p>
 
       <div className="mt-8 overflow-x-auto rounded-2xl bg-[#17171A]">
         <table className="w-full min-w-[720px] text-left text-sm">
@@ -57,10 +47,7 @@ export default async function InventarioPage() {
               const bajo = !agotado && i.stock_actual < STOCK_BAJO;
 
               return (
-                <tr
-                  key={i.id_instrumento}
-                  className="border-b border-[#26262b] last:border-0"
-                >
+                <tr key={i.id_instrumento} className="border-b border-[#26262b] last:border-0">
                   <td className="px-4 py-3 font-medium">{i.nombre_instrumento}</td>
                   <td className="px-4 py-3 text-[#B8B2A3]">
                     {i.categoria.nombre_categoria}
