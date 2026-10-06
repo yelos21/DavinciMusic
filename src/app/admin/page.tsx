@@ -99,3 +99,13 @@ export default async function InventarioPage() {
     </main>
   );
 }
+
+
+<div className="mt-6 flex gap-3">
+  <Link href="/admin/inventario" className="rounded-lg border border-[#C9A24B] px-5 py-3 text-sm font-semibold text-[#C9A24B] hover:bg-[#C9A24B]/10">
+    Inventario
+  </Link>
+  <Link href="/admin/ventas" className="rounded-lg border border-[#C9A24B] px-5 py-3 text-sm font-semibold text-[#C9A24B] hover:bg-[#C9A24B]/10">
+    Ventas
+  </Link>
+</div>
