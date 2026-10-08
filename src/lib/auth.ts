@@ -8,6 +8,11 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
 
+   trustedOrigins: [
+    "https://davinci-music.vercel.app",
+    "https://davinci-music-*.vercel.app", // direcciones de cada deploy
+  ],
+
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
