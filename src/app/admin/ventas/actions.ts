@@ -63,3 +63,4 @@ export async function registrarVenta(formData: FormData) {
   revalidatePath("/admin/inventario");
   redirect("/admin/ventas");
 }
+

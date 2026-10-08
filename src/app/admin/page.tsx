@@ -1,4 +1,6 @@
 import Link from "next/link";
+import StatCard from "@/components/admin/StatCard";
+import { inicioDelDia, peso } from "@/lib/formato";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/require-admin";
 
@@ -6,106 +8,85 @@ export const dynamic = "force-dynamic";
 
 const STOCK_BAJO = 3;
 
-export default async function InventarioPage() {
-  await requireAdmin();
+export default async function AdminPage() {
+  const { session } = await requireAdmin();
 
-  const instrumentos = await prisma.instrumento.findMany({
-    include: { categoria: true },
-    orderBy: [{ id_categoria: "asc" }, { nombre_instrumento: "asc" }],
-  });
+  const [ventasHoy, totalInstrumentos, totalClientes, porReponer] =
+    await Promise.all([
+      prisma.venta.findMany({
+        where: { fecha_venta: { gte: inicioDelDia() } },
+        include: { detalles: true },
+      }),
+      prisma.instrumento.count(),
+      prisma.cliente.count(),
+      prisma.instrumento.findMany({
+        where: { activo: true, stock_actual: { lt: STOCK_BAJO } },
+        orderBy: { stock_actual: "asc" },
+      }),
+    ]);
 
-  const conStockBajo = instrumentos.filter(
-    (i) => i.activo && i.stock_actual < STOCK_BAJO,
-  ).length;
+  const totalHoy = ventasHoy
+    .flatMap((v) => v.detalles)
+    .reduce((suma, d) => suma + d.cantidad * Number(d.precio_unitario), 0);
 
   return (
     <main className="min-h-screen bg-[#0F0F10] p-8 text-[#F5F1E8]">
-      <Link href="/admin" className="text-sm text-[#C9A24B] hover:text-[#DDB95F]">
-        ← Volver al panel
-      </Link>
+      <h1 className="font-serif text-4xl font-semibold">
+        Panel de administración
+      </h1>
+      <p className="mt-2 text-[#B8B2A3]">Hola, {session.user.name}</p>
 
-      <div className="mt-4 flex items-end justify-between">
-        <div>
-          <h1 className="font-serif text-4xl font-semibold">Inventario</h1>
-          <p className="mt-2 text-[#B8B2A3]">
-            {instrumentos.length} instrumentos · {conStockBajo} con stock bajo
-          </p>
-        </div>
+      <div className="mt-6 flex gap-3">
         <Link
-          href="/admin/inventario/nuevo"
-          className="rounded-lg bg-[#C9A24B] px-5 py-3 text-sm font-semibold text-[#0F0F10] hover:bg-[#DDB95F]"
+          href="/admin/inventario"
+          className="rounded-lg border border-[#C9A24B] px-5 py-3 text-sm font-semibold text-[#C9A24B] hover:bg-[#C9A24B]/10"
         >
-          Nuevo instrumento
+          Inventario
+        </Link>
+        <Link
+          href="/admin/ventas"
+          className="rounded-lg border border-[#C9A24B] px-5 py-3 text-sm font-semibold text-[#C9A24B] hover:bg-[#C9A24B]/10"
+        >
+          Ventas
         </Link>
       </div>
 
-      <div className="mt-8 overflow-x-auto rounded-2xl bg-[#17171A]">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="border-b border-[#33333a] text-[#B8B2A3]">
-            <tr>
-              <th className="px-4 py-3 font-medium">Instrumento</th>
-              <th className="px-4 py-3 font-medium">Categoría</th>
-              <th className="px-4 py-3 font-medium">Marca</th>
-              <th className="px-4 py-3 text-right font-medium">Precio</th>
-              <th className="px-4 py-3 text-right font-medium">Stock</th>
-              <th className="px-4 py-3 font-medium">Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            {instrumentos.map((i) => {
-              const agotado = i.stock_actual === 0;
-              const bajo = !agotado && i.stock_actual < STOCK_BAJO;
-
-              return (
-                <tr
-                  key={i.id_instrumento}
-                  className="border-b border-[#26262b] last:border-0"
-                >
-                  <td className="px-4 py-3 font-medium">{i.nombre_instrumento}</td>
-                  <td className="px-4 py-3 text-[#B8B2A3]">
-                    {i.categoria.nombre_categoria}
-                  </td>
-                  <td className="px-4 py-3 text-[#B8B2A3]">{i.marca ?? "—"}</td>
-                  <td className="px-4 py-3 text-right text-[#C9A24B]">
-                    {Number(i.precio_venta).toLocaleString("es-MX", {
-                      style: "currency",
-                      currency: "MXN",
-                    })}
-                  </td>
-                  <td className="px-4 py-3 text-right">{i.stock_actual}</td>
-                  <td className="px-4 py-3">
-                    {!i.activo ? (
-                      <span className="rounded-md bg-[#33333a] px-2.5 py-1 text-xs font-semibold">
-                        Inactivo
-                      </span>
-                    ) : agotado ? (
-                      <span className="rounded-md bg-[#8B1E2D] px-2.5 py-1 text-xs font-semibold text-white">
-                        Agotado
-                      </span>
-                    ) : bajo ? (
-                      <span className="rounded-md bg-[#8B1E2D] px-2.5 py-1 text-xs font-semibold text-white">
-                        Stock bajo
-                      </span>
-                    ) : (
-                      <span className="text-xs text-[#B8B2A3]">Disponible</span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard titulo="Ventas de hoy" valor={ventasHoy.length} />
+        <StatCard titulo="Total vendido hoy" valor={peso(totalHoy)} />
+        <StatCard titulo="Instrumentos" valor={totalInstrumentos} />
+        <StatCard titulo="Clientes" valor={totalClientes} />
       </div>
+
+      <section className="mt-10 max-w-2xl">
+        <h2 className="font-serif text-2xl font-semibold">Por reponer</h2>
+
+        {porReponer.length === 0 ? (
+          <p className="mt-3 text-[#B8B2A3]">
+            Todo el inventario tiene stock suficiente.
+          </p>
+        ) : (
+          <ul className="mt-4 divide-y divide-[#26262b] rounded-2xl bg-[#17171A]">
+            {porReponer.map((i) => (
+              <li
+                key={i.id_instrumento}
+                className="flex items-center justify-between px-5 py-3"
+              >
+                <span>{i.nombre_instrumento}</span>
+                <span
+                  className={
+                    i.stock_actual === 0 ? "text-red-400" : "text-[#C9A24B]"
+                  }
+                >
+                  {i.stock_actual === 0
+                    ? "Agotado"
+                    : `${i.stock_actual} en stock`}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </main>
   );
 }
-
-
-<div className="mt-6 flex gap-3">
-  <Link href="/admin/inventario" className="rounded-lg border border-[#C9A24B] px-5 py-3 text-sm font-semibold text-[#C9A24B] hover:bg-[#C9A24B]/10">
-    Inventario
-  </Link>
-  <Link href="/admin/ventas" className="rounded-lg border border-[#C9A24B] px-5 py-3 text-sm font-semibold text-[#C9A24B] hover:bg-[#C9A24B]/10">
-    Ventas
-  </Link>
-</div>
