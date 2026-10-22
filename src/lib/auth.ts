@@ -9,6 +9,7 @@ export const auth = betterAuth({
   }),
 
    trustedOrigins: [
+    "http://localhost:3000",
     "https://davinci-music.vercel.app",
     "https://davinci-music-*.vercel.app", // direcciones de cada deploy
   ],
