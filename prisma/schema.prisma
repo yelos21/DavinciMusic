@@ -161,9 +161,9 @@ model InscripcionClase{
 }
 
 model pagoClase {
-  id_pago_clase Int @id @default(autoincrement())
+  id_pago_clase Int @id @default(autoincrement()) @db.Date
   id_inscripcion Int 
-  periodo_pagado  DateTime
+  periodo_pagado  DateTime @db.Date
   importe Decimal @db.Decimal(10,2)
   fecha_vencimiento DateTime 
   fecha_pago DateTime?
