@@ -149,7 +149,7 @@ model InscripcionClase{
   id_inscripcion Int @id @default(autoincrement())
   id_cliente Int 
   id_clase Int 
-  fecha_inscripcion DateTime @db.Time 
+  fecha_inscripcion DateTime @default(now()) 
   costo_mensual_acordado  Decimal  @db.Decimal(10, 2)
   estado_inscripcion String @default("Activa")
 
@@ -163,7 +163,7 @@ model InscripcionClase{
 model pagoClase {
   id_pago_clase Int @id @default(autoincrement())
   id_inscripcion Int 
-  periodo_pagado  DateTime @db.Time
+  periodo_pagado  DateTime
   importe Decimal @db.Decimal(10,2)
   fecha_vencimiento DateTime 
   fecha_pago DateTime?
@@ -204,7 +204,7 @@ model DetalleVenta  {
 }
 
 model Proveedor {
-  id_proovedor Int @id @default(autoincrement())
+  id_provedor Int @id @default(autoincrement()) @map("id_proovedor")
   nombre_proveedor String
   rfc String @unique
   correo String
@@ -219,12 +219,12 @@ model Proveedor {
 
 model OrdenAbastecimiento {
   id_orden Int @id @default(autoincrement())
-  id_proovedor Int 
+  id_provedor            Int @map("id_proovedor")
   id_administrador Int 
   fecha_orden DateTime @default(now())
   estado_orden String @default("Pendiente")
 
-  proveedor Proveedor @relation(fields: [id_proovedor], references: [id_proovedor])
+  proveedor Proveedor @relation(fields: [id_provedor], references: [id_provedor])
   administrador Administrador @relation (fields: [id_administrador], references: [id_administrador])
   detalles DetalleOrden[]
 
