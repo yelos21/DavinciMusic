@@ -9,16 +9,16 @@ const categorias = [
 ];
 
 const instrumentos = [
-  { categoria: "Guitarras y bajos", nombre: "Guitarra acústica", marca: "Yamaha", modelo: "F310", tamano: "4/4", color: "Natural", precio: 3899, stock: 8 },
-  { categoria: "Guitarras y bajos", nombre: "Guitarra eléctrica Stratocaster", marca: "Squier", modelo: "Affinity", tamano: "4/4", color: "Sunburst", precio: 7499, stock: 5 },
-  { categoria: "Guitarras y bajos", nombre: "Guitarra clásica", marca: "Cordoba", modelo: "C5", tamano: "4/4", color: "Caoba", precio: 5299, stock: 2 },
-  { categoria: "Guitarras y bajos", nombre: "Bajo eléctrico", marca: "Ibanez", modelo: "GSR200", tamano: "4 cuerdas", color: "Negro", precio: 8999, stock: 3 },
-  { categoria: "Teclados y pianos", nombre: "Teclado 61 teclas", marca: "Casio", modelo: "CT-S200", tamano: "61 teclas", color: "Negro", precio: 3299, stock: 10 },
-  { categoria: "Teclados y pianos", nombre: "Piano digital", marca: "Yamaha", modelo: "P-45", tamano: "88 teclas", color: "Negro", precio: 12999, stock: 1 },
-  { categoria: "Batería y percusión", nombre: "Batería acústica 5 piezas", marca: "Pearl", modelo: "Roadshow", tamano: "5 piezas", color: "Rojo", precio: 16999, stock: 2 },
-  { categoria: "Batería y percusión", nombre: "Cajón flamenco", marca: "Meinl", modelo: "Jumbo", tamano: "Estándar", color: "Madera", precio: 2499, stock: 0 },
-  { categoria: "Audio y accesorios", nombre: "Micrófono dinámico", marca: "Shure", modelo: "SM58", tamano: "Estándar", color: "Plata", precio: 2899, stock: 12 },
-  { categoria: "Audio y accesorios", nombre: "Juego de cuerdas acústicas", marca: "D'Addario", modelo: "EJ16", tamano: "012-053", color: "Bronce", precio: 289, stock: 40 },
+  { categoria: "Guitarras y bajos", nombre: "Guitarra acústica", marca: "Yamaha", modelo: "F310", tamano: "4/4", color: "Natural", precio: 3899, stock: 8, imagen: "/instrumentos/guitarra-acustica.jpg" },
+  { categoria: "Guitarras y bajos", nombre: "Guitarra eléctrica Stratocaster", marca: "Squier", modelo: "Affinity", tamano: "4/4", color: "Sunburst", precio: 7499, stock: 5, imagen: "/instrumentos/guitarra-electrica.jpg" },
+  { categoria: "Guitarras y bajos", nombre: "Guitarra clásica", marca: "Cordoba", modelo: "C5", tamano: "4/4", color: "Caoba", precio: 5299, stock: 2, imagen: "/instrumentos/guitarra-clasica.jpg" },
+  { categoria: "Guitarras y bajos", nombre: "Bajo eléctrico", marca: "Ibanez", modelo: "GSR200", tamano: "4 cuerdas", color: "Negro", precio: 8999, stock: 3, imagen: "/instrumentos/bajo-electrico.jpg" },
+  { categoria: "Teclados y pianos", nombre: "Teclado 61 teclas", marca: "Casio", modelo: "CT-S200", tamano: "61 teclas", color: "Negro", precio: 3299, stock: 10, imagen: "/instrumentos/teclado-61.jpg" },
+  { categoria: "Teclados y pianos", nombre: "Piano digital", marca: "Yamaha", modelo: "P-45", tamano: "88 teclas", color: "Negro", precio: 12999, stock: 1, imagen: "/instrumentos/piano-digital.jpg" },
+  { categoria: "Batería y percusión", nombre: "Batería acústica 5 piezas", marca: "Pearl", modelo: "Roadshow", tamano: "5 piezas", color: "Rojo", precio: 16999, stock: 2, imagen: "/instrumentos/bateria-acustica.jpg" },
+  { categoria: "Batería y percusión", nombre: "Cajón flamenco", marca: "Meinl", modelo: "Jumbo", tamano: "Estándar", color: "Madera", precio: 2499, stock: 0, imagen: "/instrumentos/cajon-flamenco.jpg" },
+  { categoria: "Audio y accesorios", nombre: "Micrófono dinámico", marca: "Shure", modelo: "SM58", tamano: "Estándar", color: "Plata", precio: 2899, stock: 12, imagen: "/instrumentos/microfono-dinamico.jpg" },
+  { categoria: "Audio y accesorios", nombre: "Juego de cuerdas acústicas", marca: "D'Addario", modelo: "EJ16", tamano: "012-053", color: "Bronce", precio: 289, stock: 40, imagen: "/instrumentos/cuerdas-acusticas.jpg" },
 ];
 
 export async function seedInstrumentos(prisma: PrismaClient) {
@@ -33,12 +33,20 @@ export async function seedInstrumentos(prisma: PrismaClient) {
     ids.set(c.nombre_categoria, c.id_categoria);
   }
 
-  // 2. Instrumentos (si ya existe uno con el mismo nombre, lo salta)
+  // 2. Instrumentos (si ya existe uno con el mismo nombre, solo actualiza su imagen)
   for (const i of instrumentos) {
     const existe = await prisma.instrumento.findFirst({
       where: { nombre_instrumento: i.nombre, marca: i.marca },
     });
-    if (existe) continue;
+    if (existe) {
+      if (existe.imagen_url !== i.imagen) {
+        await prisma.instrumento.update({
+          where: { id_instrumento: existe.id_instrumento },
+          data: { imagen_url: i.imagen },
+        });
+      }
+      continue;
+    }
 
     await prisma.instrumento.create({
       data: {
@@ -50,6 +58,7 @@ export async function seedInstrumentos(prisma: PrismaClient) {
         color: i.color,
         precio_venta: i.precio,
         stock_actual: i.stock,
+        imagen_url: i.imagen,
       },
     });
   }

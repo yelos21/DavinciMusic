@@ -103,6 +103,7 @@ model Instrumento {
   precio_venta        Decimal  @db.Decimal(10, 2)
   stock_actual        Int      @default(0)
   activo              Boolean  @default(true)
+  imagen_url          String? 
 
   categoria       CategoriaInstrumento @relation(fields: [id_categoria], references: [id_categoria])
   clases          Clase[]
