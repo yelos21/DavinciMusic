@@ -313,3 +313,15 @@ model Verification {
   @@map("verification")
 }
 
+model MensajeContacto {
+  id_mensaje Int @id @default(autoincrement())
+  nombre String 
+  correo String 
+  telefono String? 
+  asunto String 
+  mensaje String 
+  leido Boolean @default(false)
+  fecha_envio DateTime @default(now())
+
+  @@map("mensaje_contacto")
+}

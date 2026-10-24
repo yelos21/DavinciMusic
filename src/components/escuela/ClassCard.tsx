@@ -42,7 +42,7 @@ export default function ClassCard ({clase }: {clase: ClaseConDetalle}){
                 }
             </p>
 
-            <Button href="/contacto" variant="secondary" className="self-start">
+            <Button href="/contacto?asunto=clase-muestra" variant="secondary" className="self-start">
                 Agenda una clase muestra
             </Button>
 
