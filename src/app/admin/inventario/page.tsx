@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Button from "@/components/ui/Button";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/require-admin";
 
@@ -24,10 +25,17 @@ export default async function InventarioPage() {
         ← Volver al panel
       </Link>
 
-      <h1 className="mt-4 font-serif text-4xl font-semibold">Inventario</h1>
-      <p className="mt-2 text-[#B8B2A3]">
-        {instrumentos.length} instrumentos · {conStockBajo} con stock bajo
-      </p>
+      <div className="mt-4 flex items-end justify-between gap-4">
+        <div>
+          <h1 className="font-serif text-4xl font-semibold">Inventario</h1>
+          <p className="mt-2 text-[#B8B2A3]">
+            {instrumentos.length} instrumentos · {conStockBajo} con stock bajo
+          </p>
+        </div>
+        <Button href="/admin/inventario/nuevo" size="lg">
+          Nuevo instrumento
+        </Button>
+      </div>
 
       <div className="mt-8 overflow-x-auto rounded-2xl bg-[#17171A]">
         <table className="w-full min-w-[720px] text-left text-sm">

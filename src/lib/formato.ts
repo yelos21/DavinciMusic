@@ -11,3 +11,14 @@ export function peso(cantidad: number): string {
     currency: "MXN",
   });
 }
+
+export const DIAS = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
+
+export function hora(fecha: Date): string{
+  return fecha.toLocaleTimeString("es-MX", {
+    timeZone: "UTC",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  })
+}
