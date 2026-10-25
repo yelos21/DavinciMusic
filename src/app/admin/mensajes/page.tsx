@@ -45,7 +45,7 @@ export default async function MensajesPage() {
                 {m.correo}
                 {m.telefono ? ` · ${m.telefono}` : ""} ·{" "}
                 {m.fecha_envio.toLocaleString("es-MX")}
-              </p>
+              </p>|
               <p className="mt-3 whitespace-pre-wrap">{m.mensaje}</p>
             </li>
           ))}

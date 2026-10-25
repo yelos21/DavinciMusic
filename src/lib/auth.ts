@@ -3,6 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { prisma } from "./prisma";
 import {Resend} from "resend";
+import { enviarCorreo, escaparHTML } from "./correo";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -21,12 +22,16 @@ export const auth = betterAuth({
     enabled: true,
     minPasswordLength: 8,
     sendResetPassword: async ({ user, url }) => {
-      await resend.emails.send({
-        from: "Davinci Music <no-reply@tudomino.com>",
-        to: user.email,
-        subject: "Restablecer contraseña",
-        html: `<p>Haz clic para restablecer tu contraseña:</p><a href="${url}">Restablecer contraseña</a>`,
-      });
+      void enviarCorreo({
+        para: user.email,
+        asunto: "Restablecer contraseña",
+        texto: `Hola ${user.name}, restablece tu contraseña aquí: ${url}`,
+        html: `
+      <p>Hola ${escaparHTML(user.name)},</p>
+      <p>Recibimos una solicitud para restablecer tu contraseña. El enlace es válido por 1 hora.</p>
+      <p><a href="${url}">Restablecer contraseña</a></p>
+      <p>Si no fuiste tú, ignora este correo.</p>
+    `,      });
     },
   },
 
