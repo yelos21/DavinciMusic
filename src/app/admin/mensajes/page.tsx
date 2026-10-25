@@ -47,18 +47,6 @@ export default async function MensajesPage() {
                 {m.fecha_envio.toLocaleString("es-MX")}
               </p>
               <p className="mt-3 whitespace-pre-wrap">{m.mensaje}</p>
-
-              {!m.leido && (
-                <form action={marcarLeido} className="mt-4">
-                  <input type="hidden" name="id" value={m.id_mensaje} />
-                  <button
-                    type="submit"
-                    className="rounded-lg border border-[#C9A24B] px-4 py-2 text-sm font-semibold text-[#C9A24B] hover:bg-[#C9A24B]/10"
-                  >
-                    Marcar como leído
-                  </button>
-                </form>
-              )}
             </li>
           ))}
         </ul>

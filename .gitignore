@@ -82,3 +82,5 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+_migraciones_viejas
