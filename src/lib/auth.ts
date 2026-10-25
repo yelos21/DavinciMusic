@@ -6,6 +6,7 @@ import {Resend} from "resend";
 import { enviarCorreo, escaparHTML } from "./correo";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+const exigirVerificacion = process.env.REQUIERE_EMAIL_VERIFICATION == "true";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -19,6 +20,8 @@ export const auth = betterAuth({
   ], 
 
   emailAndPassword: {
+    sendOnSingUp: exigirVerificacion,
+    autoSingInAfterVerification: true,
     enabled: true,
     minPasswordLength: 8,
     sendResetPassword: async ({ user, url }) => {

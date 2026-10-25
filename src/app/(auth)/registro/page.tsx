@@ -14,12 +14,16 @@ export default function RegistroPage() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [pendiente, setPendiente] = useState(false);
+  const [correo, setCorreo] = useState("");
+  const [reenviado, setReenviado] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
 
     const form = new FormData(e.currentTarget);
+    const email = String(form.get("email"));
     const password = String(form.get("password"));
 
     if (password !== String(form.get("confirm"))) {
@@ -28,10 +32,11 @@ export default function RegistroPage() {
     }
 
     setLoading(true);
-    const { error } = await authClient.signUp.email({
+    const { data, error } = await authClient.signUp.email({
       name: String(form.get("name")),
-      email: String(form.get("email")),
+      email,
       password,
+      callbackURL: "/",
     });
     setLoading(false);
 
@@ -39,8 +44,49 @@ export default function RegistroPage() {
       setError(error.message ?? "No se pudo crear la cuenta.");
       return;
     }
+
+    // Sin sesión: la verificación de correo es obligatoria
+    if (!data?.token) {
+      setCorreo(email);
+      setPendiente(true);
+      return;
+    }
+
     router.push("/");
     router.refresh();
+  }
+
+  async function reenviar() {
+    await authClient.sendVerificationEmail({ email: correo, callbackURL: "/" });
+    setReenviado(true);
+  }
+
+  // Pantalla de espera mientras el usuario verifica su correo
+  if (pendiente) {
+    return (
+      <div className="flex flex-col gap-5">
+        <h1 className="font-serif text-4xl font-semibold">Revisa tu correo</h1>
+        <p className="text-[#B8B2A3]">
+          Enviamos un enlace de verificación a <strong>{correo}</strong>. Ábrelo
+          para activar tu cuenta. Es válido por 1 hora.
+        </p>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={reenviar}
+          disabled={reenviado}
+          className="self-start"
+        >
+          {reenviado ? "Enlace reenviado" : "Reenviar enlace"}
+        </Button>
+        <Link
+          href="/login"
+          className="text-sm text-[#C9A24B] hover:text-[#DDB95F]"
+        >
+          Volver a iniciar sesión
+        </Link>
+      </div>
+    );
   }
 
   return (

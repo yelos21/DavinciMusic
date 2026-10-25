@@ -26,9 +26,14 @@ export default function LoginPage() {
       password: String(form.get("password")),
     });
 
+    
     setLoading(false);
     if (error) {
-      setError("Correo o contraseña incorrectos.");
+      setError(
+        error.status === 403
+          ? "Verifica tu correo para entrar. Te enviamos un nuevo enlace."
+          : "Correo o contraseña incorrectos.",
+      );
       return;
     }
     router.push("/");
