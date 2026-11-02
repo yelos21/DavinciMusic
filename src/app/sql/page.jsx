@@ -13,6 +13,10 @@ export default function PanelBD() {
   const [historial, setHistorial] = useState([]);
   const [consulta, setConsulta] = useState(null); // { titulo, filas }
   const [cargando, setCargando] = useState(false);
+  // 5.x Práctica avanzada: solo bases que empiezan con practica_
+  const [bd5, setBd5] = useState('practica_davinci');
+  const [seccion5, setSeccion5] = useState(null);
+  const [vista5, setVista5] = useState('v_instrumentos_categoria');
 
   const agregar = (ok, texto) => setHistorial((h) => [{ ok, texto }, ...h]);
 
@@ -119,6 +123,46 @@ export default function PanelBD() {
     r.readAsText(f);
   };
 
+  // 5.1 - 5.6 Práctica avanzada
+  const url5 = (params) =>
+    `/api/practica5?motor=${motor}&bd=${encodeURIComponent(bd5)}&${new URLSearchParams(params)}`;
+
+  const lista5 = async (seccion, titulo) => {
+    const d = await llamar(url5({ seccion }));
+    if (!d.ok) return agregar(false, d.error);
+    setSeccion5({ titulo, resultados: d.resultados, resumen: `${d.correctas} de ${d.total} consultas correctas` });
+    agregar(d.errores.length === 0, `${titulo}: ${d.correctas}/${d.total} correctas${d.errores.length ? '\n' + d.errores.join('\n') : ''}`);
+  };
+
+  const accion5 = async (accion, titulo) => {
+    const d = await post('/api/practica5', { accion, bd: bd5 });
+    if (!d.ok) return agregar(false, d.error);
+    if (d.secciones) setSeccion5({ titulo, avance: d });
+    else if (d.pruebas) setSeccion5({ titulo, pruebas: d.pruebas });
+    else if (d.vistas) setSeccion5({ titulo, resumen: d.mensaje, resultados: [], lista: d.vistas });
+    else agregar(true, d.mensaje || 'Listo');
+    if (d.mensaje && !d.secciones) agregar(true, d.mensaje);
+  };
+
+  const verVistas5 = async () => {
+    const d = await llamar(url5({ seccion: 'vistas' }));
+    if (!d.ok) return agregar(false, d.error);
+    setConsulta({ titulo: `Vistas en ${bd5}`, filas: d.vistas });
+    agregar(true, `${d.total} vistas encontradas en ${bd5}`);
+  };
+
+  const verFunciones5 = async () => {
+    const d = await llamar(url5({ seccion: 'funciones' }));
+    if (!d.ok) return agregar(false, d.error);
+    setSeccion5({ titulo: `Funciones y disparadores en ${bd5}`, funciones: d.funciones, disparadores: d.disparadores, auditoria: d.registros_auditoria });
+  };
+
+  const consultarVista5 = async () => {
+    const d = await llamar(url5({ seccion: 'vista', vista: vista5 }));
+    if (!d.ok) return agregar(false, d.error);
+    setConsulta({ titulo: vista5, filas: d.filas });
+  };
+
   return (
     <main style={s.main}>
       <style>{`
@@ -214,6 +258,126 @@ export default function PanelBD() {
         </div>
       </section>
 
+      <section style={s.grupo}>
+        <h2 style={s.h2}>5. Práctica avanzada (consultas, JOIN, vistas, funciones)</h2>
+        <p style={s.vacio}>
+          Trabaja sobre una base de práctica con el mismo esquema del proyecto. Solo acepta nombres que empiezan con
+          <code> practica_</code>; la base real (neondb) no se modifica.
+        </p>
+        <input style={{ ...s.input, width: '100%', marginBottom: 8 }} value={bd5} onChange={(e) => setBd5(e.target.value)} placeholder="practica_davinci" />
+        <div style={s.fila}>
+          <button style={{ ...s.btn, ...s.verde }} disabled={cargando} onClick={() => accion5('preparar', '5.0 Base de práctica preparada')}>5.0 Preparar base de práctica</button>
+        </div>
+      </section>
+
+      <section style={s.grupo}>
+        <h2 style={s.h2}>5.1 25 consultas simples</h2>
+        <div style={s.fila}>
+          <button style={{ ...s.btn, ...s.azul }} disabled={cargando} onClick={() => lista5('consultas', '5.1 Consultas simples')}>Ejecutar las 25 consultas</button>
+        </div>
+      </section>
+
+      <section style={s.grupo}>
+        <h2 style={s.h2}>5.2 15 operaciones JOIN</h2>
+        <div style={s.fila}>
+          <button style={{ ...s.btn, ...s.azul }} disabled={cargando} onClick={() => lista5('joins', '5.2 Operaciones JOIN')}>Ejecutar los 15 JOIN</button>
+        </div>
+      </section>
+
+      <section style={s.grupo}>
+        <h2 style={s.h2}>5.3 15 funciones agregadas</h2>
+        <div style={s.fila}>
+          <button style={{ ...s.btn, ...s.azul }} disabled={cargando} onClick={() => lista5('agregadas', '5.3 Funciones agregadas')}>Ejecutar las 15 agregadas</button>
+        </div>
+      </section>
+
+      <section style={s.grupo}>
+        <h2 style={s.h2}>5.4 5 vistas</h2>
+        <div style={s.fila}>
+          <button style={{ ...s.btn, ...s.azul }} disabled={cargando} onClick={() => accion5('vistas', '5.4 Vistas creadas')}>Crear las 5 vistas</button>
+          <button style={{ ...s.btn, ...s.gris }} disabled={cargando} onClick={verVistas5}>Ver vistas</button>
+        </div>
+        <div style={{ ...s.fila, marginTop: 8 }}>
+          <select style={{ ...s.input, flex: 1, minWidth: 220 }} value={vista5} onChange={(e) => setVista5(e.target.value)}>
+            <option value="v_instrumentos_categoria">v_instrumentos_categoria</option>
+            <option value="v_clases_detalle">v_clases_detalle</option>
+            <option value="v_inscripciones_resumen">v_inscripciones_resumen</option>
+            <option value="v_ventas_resumen">v_ventas_resumen</option>
+            <option value="v_stock_bajo">v_stock_bajo</option>
+          </select>
+          <button style={{ ...s.btn, ...s.gris }} disabled={cargando} onClick={consultarVista5}>Consultar vista</button>
+        </div>
+      </section>
+
+      <section style={s.grupo}>
+        <h2 style={s.h2}>5.5 5 funciones y 3 disparadores</h2>
+        <div style={s.fila}>
+          <button style={{ ...s.btn, ...s.azul }} disabled={cargando} onClick={() => accion5('funciones', '5.5 Funciones y disparadores creados')}>Crear funciones y disparadores</button>
+          <button style={{ ...s.btn, ...s.ambar }} disabled={cargando} onClick={() => accion5('probar', '5.5 Prueba de disparadores')}>Probar disparadores</button>
+          <button style={{ ...s.btn, ...s.gris }} disabled={cargando} onClick={verFunciones5}>Ver funciones</button>
+        </div>
+      </section>
+
+      <section style={s.grupo}>
+        <h2 style={s.h2}>5.6 Tercer avance del proyecto</h2>
+        <div style={s.fila}>
+          <button style={{ ...s.btn, ...s.verde }} disabled={cargando} onClick={() => accion5('avance3', '5.6 Tercer avance')}>Presentar tercer avance</button>
+        </div>
+      </section>
+
+      {seccion5 && (
+        <section style={s.grupo}>
+          <h2 style={s.h2}>{seccion5.titulo}</h2>
+          {seccion5.resumen && <p style={s.vacio}>{seccion5.resumen}</p>}
+
+          {seccion5.avance && (
+            <>
+              <ul style={s.lista}>
+                <li>Base: <strong>{seccion5.avance.bd}</strong> ({seccion5.avance.datos_de_ejemplo})</li>
+                <li>Registros: {Object.entries(seccion5.avance.registros).map(([t, n]) => `${t}=${n}`).join(', ')}</li>
+                <li>Vistas: {seccion5.avance.vistas.creadas} — {seccion5.avance.vistas.nombres.join(', ')}</li>
+                <li>Funciones: {seccion5.avance.funciones.creadas} · Disparadores: {seccion5.avance.funciones.disparadores}</li>
+                {seccion5.avance.secciones.map((x) => (
+                  <li key={x.seccion}>
+                    {x.seccion}: <strong style={{ color: x.errores.length ? 'var(--err)' : 'var(--ok)' }}>{x.correctas}/{x.total}</strong> correctas
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {seccion5.pruebas && (
+            <ul style={s.lista}>
+              {seccion5.pruebas.map((p, i) => (
+                <li key={i} style={{ color: p.startsWith('RECHAZADO') ? 'var(--err)' : p.startsWith('ADVERTENCIA') ? 'var(--err)' : undefined }}>{p}</li>
+              ))}
+            </ul>
+          )}
+
+          {seccion5.funciones && (
+            <>
+              <p style={{ ...s.vacio, marginBottom: 4 }}>Funciones: {seccion5.funciones.length ? seccion5.funciones.join(', ') : 'ninguna'}</p>
+              <p style={{ ...s.vacio, marginBottom: 4 }}>Disparadores: {seccion5.disparadores.length ? seccion5.disparadores.join(', ') : 'ninguno'}</p>
+              <p style={s.vacio}>Registros en auditoría: {seccion5.auditoria}</p>
+            </>
+          )}
+
+          {seccion5.lista && <p style={s.vacio}>{seccion5.lista.join(', ')}</p>}
+
+          {(seccion5.resultados || []).map((r) => (
+            <details key={r.n} style={s.detalle}>
+              <summary style={s.summary}>{r.n}. {r.titulo}</summary>
+              <pre style={s.sql}>{r.sql}</pre>
+              {r.error ? (
+                <p style={{ ...s.vacio, color: 'var(--err)' }}>{r.error}</p>
+              ) : (
+                <TablaFilas filas={r.filas} />
+              )}
+            </details>
+          ))}
+        </section>
+      )}
+
       {consulta && (
         <section style={s.grupo}>
           <h2 style={s.h2}>{consulta.titulo}</h2>
@@ -250,6 +414,29 @@ export default function PanelBD() {
   );
 }
 
+function TablaFilas({ filas }) {
+  if (!filas || filas.length === 0) return <p style={s.vacio}>Sin resultados.</p>;
+  const columnas = Object.keys(filas[0]);
+  return (
+    <div style={s.tablaWrap}>
+      <table style={s.tabla}>
+        <thead>
+          <tr>{columnas.map((c) => <th key={c} style={s.th}>{c}</th>)}</tr>
+        </thead>
+        <tbody>
+          {filas.map((f, i) => (
+            <tr key={i}>
+              {columnas.map((c) => (
+                <td key={c} style={s.td}>{f[c] === null ? 'NULL' : String(f[c])}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 const s = {
   main: { maxWidth: 720, margin: '0 auto', padding: '32px 16px', fontFamily: 'system-ui, sans-serif', color: 'var(--texto)', background: 'var(--bg)', minHeight: '100vh' },
   h1: { fontSize: 28, margin: 0 },
@@ -273,4 +460,8 @@ const s = {
   th: { textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid var(--borde)', color: 'var(--suave)', fontWeight: 600 },
   td: { padding: '6px 8px', borderBottom: '1px solid var(--borde)' },
   log: { margin: '0 0 8px', padding: 10, background: 'var(--panel)', color: 'var(--texto)', borderLeft: '4px solid', fontSize: 13, whiteSpace: 'pre-wrap', wordBreak: 'break-word' },
+  lista: { fontSize: 14, lineHeight: 1.7, margin: '0 0 8px', paddingLeft: 20 },
+  detalle: { border: '1px solid var(--borde)', borderRadius: 6, padding: '8px 10px', marginBottom: 8, background: 'var(--panel)' },
+  summary: { cursor: 'pointer', fontSize: 14, fontWeight: 600 },
+  sql: { margin: '6px 0', padding: 8, background: 'var(--campo)', border: '1px solid var(--borde)', borderRadius: 4, fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-word' },
 };
