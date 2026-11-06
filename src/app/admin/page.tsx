@@ -49,6 +49,22 @@ export default async function AdminPage() {
         >
           Ventas
         </Link>
+
+        <Link
+          href="/admin/ordenes"
+          className="rounded-lg border border-[#C9A24B] px-5 py-3 text-sm font-semibold text-[#C9A24B] hover:bg-[#C9A24B]/10">
+        Abastecimiento
+        </Link>
+
+
+
+
+      <Link
+      href="/admin/proveedores"
+      className="rounded-lg border border-[#C9A24B] px-5 py-3 text-sm font-semibold text-[#C9A24B] hover:bg-[#C9A24B]/10" >
+      Proveedores
+      </Link>
+
       </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
