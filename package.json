@@ -7,6 +7,9 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "db:mongo:ping": "tsx scripts/mongo-ping.ts",
+    "db:mongo:seed": "tsx scripts/seed-mongo.ts",
+    "db:mongo:muestra": "tsx scripts/mongo-muestra.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -14,6 +17,7 @@
     "@prisma/client": "^7.10.0",
     "better-auth": "^1.7.7",
     "dotenv": "^18.0.1",
+    "mongoose": "^9.12.0",
     "next": "^16.4.2",
     "pg": "^8.23.0",
     "react": "19.2.8",
