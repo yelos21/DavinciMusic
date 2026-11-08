@@ -58,12 +58,20 @@ export default async function AdminPage() {
 
 
 
+        <Link
+          href="/admin/inscripciones"
+          className="rounded-lg border border-[#C9A24B] px-5 py-3 text-sm font-semibold text-[#C9A24B] hover:bg-[#C9A24B]/10">
+          Inscripciones
+        </Link>
 
-      <Link
-      href="/admin/proveedores"
-      className="rounded-lg border border-[#C9A24B] px-5 py-3 text-sm font-semibold text-[#C9A24B] hover:bg-[#C9A24B]/10" >
-      Proveedores
-      </Link>
+
+
+
+        <Link
+        href="/admin/proveedores"
+        className="rounded-lg border border-[#C9A24B] px-5 py-3 text-sm font-semibold text-[#C9A24B] hover:bg-[#C9A24B]/10" >
+        Proveedores
+        </Link>
 
       </div>
 
