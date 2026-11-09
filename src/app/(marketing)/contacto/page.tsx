@@ -14,9 +14,9 @@ import { enviarMensaje } from "./actions";
 export default async function ContactoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ enviado?: string; error?: string; asunto?: string }>;
+  searchParams: Promise<{ enviado?: string; error?: string; asunto?: string; producto?: string }>;
 }) {
-  const { enviado, error, asunto } = await searchParams;
+  const { enviado, error, asunto, producto } = await searchParams;
   const asuntoInicial = asunto === "clase-muestra" ? "Clase muestra" : "Tienda";
 
   return (
@@ -77,6 +77,7 @@ export default async function ContactoPage({
               required
               minLength={10}
               maxLength={1000}
+              defaultValue={producto ? `Me interesa: ${producto.slice(0, 100)}` : ""}
               className={`${inputClass} min-h-32 py-3`}
             />
           </div>

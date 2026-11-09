@@ -10,7 +10,7 @@ const enlaces = [
   { href: "/contacto", label: "Contacto" },
 ];
 
-export default function Navbar() {
+export default function Navbar({ esAdmin = false }: { esAdmin?: boolean }) {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
 
@@ -41,6 +41,14 @@ export default function Navbar() {
       <div className="flex items-center gap-4 text-sm font-medium">
         {isPending ? null : session ? (
           <>
+            {esAdmin && (
+              <Link
+                href="/admin"
+                className="rounded-full bg-[#C9A24B] px-4 py-2 font-semibold text-[#0F0F10] hover:bg-[#DDB95F]"
+              >
+                Panel de administración
+              </Link>
+            )}
             <Link href="/mi-cuenta" className="hover:text-[#DDB95F]">
               Hola, {session.user.name}
             </Link>

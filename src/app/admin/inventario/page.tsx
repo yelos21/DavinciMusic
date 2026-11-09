@@ -1,7 +1,8 @@
 import Link from "next/link";
-import Button from "@/components/ui/Button";
+import { peso } from "@/lib/formato";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/require-admin";
+import { cambiarEstadoInstrumento } from "./[id]/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -25,20 +26,23 @@ export default async function InventarioPage() {
         ← Volver al panel
       </Link>
 
-      <div className="mt-4 flex items-end justify-between gap-4">
+      <div className="mt-4 flex items-end justify-between">
         <div>
           <h1 className="font-serif text-4xl font-semibold">Inventario</h1>
           <p className="mt-2 text-[#B8B2A3]">
             {instrumentos.length} instrumentos · {conStockBajo} con stock bajo
           </p>
         </div>
-        <Button href="/admin/inventario/nuevo" size="lg">
+        <Link
+          href="/admin/inventario/nuevo"
+          className="rounded-lg bg-[#C9A24B] px-5 py-3 text-sm font-semibold text-[#0F0F10] hover:bg-[#DDB95F]"
+        >
           Nuevo instrumento
-        </Button>
+        </Link>
       </div>
 
       <div className="mt-8 overflow-x-auto rounded-2xl bg-[#17171A]">
-        <table className="w-full min-w-[720px] text-left text-sm">
+        <table className="w-full min-w-[820px] text-left text-sm">
           <thead className="border-b border-[#33333a] text-[#B8B2A3]">
             <tr>
               <th className="px-4 py-3 font-medium">Instrumento</th>
@@ -47,6 +51,7 @@ export default async function InventarioPage() {
               <th className="px-4 py-3 text-right font-medium">Precio</th>
               <th className="px-4 py-3 text-right font-medium">Stock</th>
               <th className="px-4 py-3 font-medium">Estado</th>
+              <th className="px-4 py-3 font-medium"></th>
             </tr>
           </thead>
           <tbody>
@@ -55,17 +60,17 @@ export default async function InventarioPage() {
               const bajo = !agotado && i.stock_actual < STOCK_BAJO;
 
               return (
-                <tr key={i.id_instrumento} className="border-b border-[#26262b] last:border-0">
+                <tr
+                  key={i.id_instrumento}
+                  className="border-b border-[#26262b] last:border-0"
+                >
                   <td className="px-4 py-3 font-medium">{i.nombre_instrumento}</td>
                   <td className="px-4 py-3 text-[#B8B2A3]">
                     {i.categoria.nombre_categoria}
                   </td>
                   <td className="px-4 py-3 text-[#B8B2A3]">{i.marca ?? "—"}</td>
                   <td className="px-4 py-3 text-right text-[#C9A24B]">
-                    {Number(i.precio_venta).toLocaleString("es-MX", {
-                      style: "currency",
-                      currency: "MXN",
-                    })}
+                    {peso(Number(i.precio_venta))}
                   </td>
                   <td className="px-4 py-3 text-right">{i.stock_actual}</td>
                   <td className="px-4 py-3">
@@ -84,6 +89,25 @@ export default async function InventarioPage() {
                     ) : (
                       <span className="text-xs text-[#B8B2A3]">Disponible</span>
                     )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center justify-end gap-4">
+                      <Link
+                        href={`/admin/inventario/${i.id_instrumento}/editar`}
+                        className="text-xs text-[#C9A24B] hover:text-[#DDB95F]"
+                      >
+                        Editar
+                      </Link>
+                      <form action={cambiarEstadoInstrumento}>
+                        <input type="hidden" name="id" value={i.id_instrumento} />
+                        <button
+                          type="submit"
+                          className="text-xs text-[#B8B2A3] hover:text-[#F5F1E8]"
+                        >
+                          {i.activo ? "Desactivar" : "Activar"}
+                        </button>
+                      </form>
+                    </div>
                   </td>
                 </tr>
               );
