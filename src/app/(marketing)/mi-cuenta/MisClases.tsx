@@ -20,8 +20,10 @@ export default async function MisClases({ idCliente }: { idCliente: number }) {
 
   const ahora = new Date();
 
-  // Lo que se debe en total, sumando todos los cargos pendientes
+  // Lo que se debe en total, sumando los cargos pendientes de las
+  // inscripciones que siguen vigentes (una baja ya no genera adeudo)
   const adeudo = inscripciones
+    .filter((i) => i.estado_inscripcion !== "Baja")
     .flatMap((i) => i.pagos)
     .filter((p) => p.estado_pago === "Pendiente")
     .reduce((suma, p) => suma + Number(p.importe), 0);

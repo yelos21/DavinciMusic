@@ -73,6 +73,15 @@ export default async function AdminPage() {
         Proveedores
         </Link>
 
+
+        <Link
+        href="/admin/usuarios"
+        className="rounded-lg border border-[#C9A24B] px-5 py-3 text-sm font-semibold text-[#C9A24B] hover:bg-[#C9A24B]/10">
+        Usuarios
+        </Link>
+
+
+
       </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

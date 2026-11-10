@@ -48,6 +48,7 @@ model Administrador {
   id_administrador    Int      @id @default(autoincrement())
   id_usuario          Int      @unique
   fecha_contratacion  DateTime
+  activo Boolean @default(true)
 
   usuario  Usuario               @relation(fields: [id_usuario], references: [id_usuario])
   ventas   Venta[]
