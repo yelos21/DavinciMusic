@@ -1,7 +1,10 @@
 import Button from "@/components/ui/Button";
+import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/sesion";
 import { actualizarPerfil } from "./actions";
 import CambiarPasswordForm from "./CambiarPasswordForm";
+import MisClases from "./MisClases";
+import MisCompras from "./MisCompras";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +19,11 @@ export default async function MiCuentaPage({
 }) {
   const { session, usuario } = await requireUser();
   const { guardado, error } = await searchParams;
+
+  // Un maestro o administrador puede no tener rol de cliente
+  const cliente = await prisma.cliente.findUnique({
+    where: { id_usuario: usuario.id_usuario },
+  });
 
   return (
     <div className="bg-[#0F0F10] px-8 py-12 text-[#F5F1E8]">
@@ -33,7 +41,7 @@ export default async function MiCuentaPage({
 
             <div className="flex flex-col gap-2">
               <label htmlFor="correo" className="text-sm font-medium">Correo electrónico</label>
-              <input id="correo" value={session.user.email} disabled className={inputClass} />
+              <input id="correo" defaultValue={session.user.email} disabled className={inputClass} />
               <p className="text-xs text-[#B8B2A3]">
                 {session.user.emailVerified ? "Correo verificado." : "Correo sin verificar."}{" "}
                 El correo no se puede cambiar por ahora.
@@ -68,6 +76,13 @@ export default async function MiCuentaPage({
           </div>
         </section>
       </div>
+
+      {cliente && (
+        <>
+          <MisClases idCliente={cliente.id_cliente} />
+          <MisCompras idCliente={cliente.id_cliente} />
+        </>
+      )}
     </div>
   );
 }

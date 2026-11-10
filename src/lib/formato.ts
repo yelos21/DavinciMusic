@@ -12,7 +12,7 @@ export function peso(cantidad: number): string {
   });
 }
 
-export const DIAS = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
+export const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
 export function hora(fecha: Date): string{
   return fecha.toLocaleTimeString("es-MX", {
