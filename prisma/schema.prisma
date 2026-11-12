@@ -40,6 +40,8 @@ model Cliente {
   usuario        Usuario             @relation(fields: [id_usuario], references: [id_usuario])
   inscripciones  InscripcionClase[]
   ventas         Venta[]
+  carrito CarritoItem[]
+  pedidos Pedido[]
 
   @@map("cliente")
 }
@@ -110,6 +112,8 @@ model Instrumento {
   clases          Clase[]
   detalles_venta  DetalleVenta[]
   detalles_orden  DetalleOrden[]
+  carrito         CarritoItem[]
+  detalles_pedido DetallePedido[]
 
   @@map("instrumento")
 }
@@ -325,4 +329,47 @@ model MensajeContacto {
   fecha_envio DateTime @default(now())
 
   @@map("mensaje_contacto")
+}
+
+
+model CarritoItem {
+  id_cliente     Int
+  id_instrumento Int
+  cantidad       Int
+  fecha_agregado DateTime @default(now())
+
+  cliente     Cliente     @relation(fields: [id_cliente], references: [id_cliente], onDelete: Cascade)
+  instrumento Instrumento @relation(fields: [id_instrumento], references: [id_instrumento])
+
+  @@id([id_cliente, id_instrumento])
+  @@map("carrito_item")
+}
+
+model Pedido {
+  id_pedido         Int      @id @default(autoincrement())
+  id_cliente        Int
+  fecha_pedido      DateTime @default(now())
+  estado_pedido     String   @default("Pendiente")
+  metodo_pago       String
+  direccion_envio   String
+  telefono_contacto String
+  stripe_session_id String?  @unique
+
+  cliente  Cliente         @relation(fields: [id_cliente], references: [id_cliente])
+  detalles DetallePedido[]
+
+  @@map("pedido")
+}
+
+model DetallePedido {
+  id_pedido       Int
+  id_instrumento  Int
+  cantidad        Int
+  precio_unitario Decimal @db.Decimal(10, 2)
+
+  pedido      Pedido      @relation(fields: [id_pedido], references: [id_pedido], onDelete: Cascade)
+  instrumento Instrumento @relation(fields: [id_instrumento], references: [id_instrumento])
+
+  @@id([id_pedido, id_instrumento])
+  @@map("detalle_pedido")
 }

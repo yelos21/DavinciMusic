@@ -9,6 +9,7 @@ import {
   obtenerInstrumento,
   obtenerRelacionados,
 } from "@/services/instrumentos";
+import { agregarAlCarrito } from "@/app/(marketing)/carrito/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -110,6 +111,27 @@ export default async function ProductoPage({
                   }`
                 : "Disponible"}
           </p>
+
+
+          {!agotado && (
+            <form action={agregarAlCarrito} className="flex items-end gap-3">
+              <input type="hidden" name="id" value={instrumento.id_instrumento} />
+              <div className="flex flex-col gap-1">
+                <label htmlFor="cantidad" className="text-xs text-[#B8B2A3]">Cantidad</label>
+                <input
+                  id="cantidad"
+                  name="cantidad"
+                  type="number"
+                  min="1"
+                  max={instrumento.stock_actual}
+                  defaultValue={1}
+                  className="h-12 w-24 rounded-lg border border-[#33333a] bg-[#17171A] px-3 text-[#F5F1E8] focus-visible:outline-2 focus-visible:outline-[#C9A24B]"
+                />
+              </div>
+              <Button type="submit" size="lg">Agregar al carrito</Button>
+            </form>
+          )}
+
 
           <Button
             href={`/contacto?asunto=tienda&producto=${encodeURIComponent(

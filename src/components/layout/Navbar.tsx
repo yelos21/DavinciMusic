@@ -10,7 +10,13 @@ const enlaces = [
   { href: "/contacto", label: "Contacto" },
 ];
 
-export default function Navbar({ esAdmin = false }: { esAdmin?: boolean }) {
+export default function Navbar({
+  esAdmin = false,
+  carritoCount = 0,
+}: {
+  esAdmin?: boolean;
+  carritoCount?: number;
+}) {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
 
@@ -49,6 +55,9 @@ export default function Navbar({ esAdmin = false }: { esAdmin?: boolean }) {
                 Panel de administración
               </Link>
             )}
+            <Link href="/carrito" className="hover:text-[#DDB95F]">
+              Carrito{carritoCount > 0 ? ` (${carritoCount})` : ""}
+            </Link>
             <Link href="/mi-cuenta" className="hover:text-[#DDB95F]">
               Hola, {session.user.name}
             </Link>
